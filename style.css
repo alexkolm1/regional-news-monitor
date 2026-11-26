@@ -91,3 +91,9 @@ li { margin: .4rem 0; }
   .region-controls { gap: .35rem; }
   .region-controls button { padding-inline: .55rem; }
 }
+
+.region-section { border-top: 4px solid var(--region-accent); --region-accent: #327262; --region-bg: #e8f2ed; }
+.region-section:nth-of-type(2) { --region-accent: #45678b; --region-bg: #eaf0f8; }
+.region-section:nth-of-type(3) { --region-accent: #916123; --region-bg: #f8efde; }
+.region-section:nth-of-type(4) { --region-accent: #76547e; --region-bg: #f1eaf4; }
+.region-heading { background: var(--region-bg); }
