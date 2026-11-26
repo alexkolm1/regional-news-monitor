@@ -181,7 +181,7 @@ def page(title, content, prefix=""):
 <title>{escape(title)} | Regional News Monitor</title>
 <link rel="alternate" type="application/rss+xml" title="Latest news" href="{prefix}feed.xml">
 <link rel="alternate" type="application/rss+xml" title="Daily review" href="{prefix}daily.xml">
-<link rel="stylesheet" href="{prefix}style.css?v=regional-preview">
+<link rel="stylesheet" href="{prefix}style.css?v=cyprus-review">
 <header><a class="masthead" href="{prefix}index.html">Regional News Monitor</a>
 <nav aria-label="Main"><a href="{prefix}index.html">Latest news</a>
 <a href="{prefix}archive/">Press review</a><a href="{prefix}sources/">Sources</a>
@@ -189,9 +189,39 @@ def page(title, content, prefix=""):
 <main><h1>{escape(title)}</h1>{content}</main></html>"""
 
 
+def cyprus_time(value):
+    local = datetime.fromisoformat(value).astimezone(CLOCK)
+    return local.strftime("%Y-%m-%d %H:%M") + " Cyprus time"
+
+
+def region_heading(label):
+    return f'<section class="region-section"><div class="region-heading"><h2>{label}</h2></div>'
+
+
+def update_archived_layout(path):
+    original = path.read_text(encoding="utf-8")
+    updated = original.replace('style.css?v=regional-preview', 'style.css?v=cyprus-review')
+    if 'class="region-section"' not in updated:
+        for index, region in enumerate(dict.fromkeys(source["region"] for source in SOURCES)):
+            label = escape(region)
+            heading = f"<h2>{label}</h2>"
+            if heading in updated:
+                prefix = "</section>" if index else ""
+                updated = updated.replace(heading, prefix + region_heading(label), 1)
+        if updated != original and 'class="region-section"' in updated:
+            updated = updated.replace("</main>", "</section></main>", 1)
+    updated = re.sub(
+        r'(<time datetime="([^"]+)">)[^<]* UTC</time>',
+        lambda match: match[1] + cyprus_time(match[2]) + "</time>",
+        updated,
+    )
+    if updated != original:
+        write(path, updated)
+
+
 def card(row):
     return (f'<article data-source="{escape(row["source"])}" data-region="{escape(row["region"])}">'
-            f'<p class="meta">{escape(row["source"])} · <time datetime="{row["date"]}">{row["date"][:16].replace("T", " ")} UTC</time>'
+            f'<p class="meta">{escape(row["source"])} · <time datetime="{row["date"]}">{cyprus_time(row["date"])}</time>'
             f'{(" · " + escape(row["method"])) if row.get("method") else ""}</p>'
             f'<h2><a href="{escape(row["url"])}">{escape(row["title"])}</a></h2>'
             f'<p>{escape(row["description"])}</p></article>')
@@ -235,7 +265,7 @@ def build(output, base, edition):
     successful = NOW.isoformat() if any(per_source.values()) else previous["successful"]
     write(state, json.dumps({"articles": latest, "successful": successful}, ensure_ascii=False))
     rss(output / "feed.xml", base, "Regional News Monitor — Latest news", latest)
-    stamp = escape(successful[:16].replace("T", " ") + " UTC" if successful else "Pending")
+    stamp = escape(cyprus_time(successful) if successful else "Pending")
     filters = f"""<p class="meta">Last successful collection <time>{stamp}</time></p>
 <div class="filters"><label>Region <select id="region"><option value="">All regions</option>{options(s["region"] for s in SOURCES)}</select></label>
 <label>Publication <select id="source"><option value="">All publications</option>{options(s["name"] for s in SOURCES)}</select></label></div>
@@ -251,7 +281,7 @@ def build(output, base, edition):
         blocks = []
         lines = [f"Regional News Monitor — {TODAY}"]
         for region in dict.fromkeys(s["region"] for s in SOURCES):
-            blocks.append(f"<h2>{escape(region)}</h2>")
+            blocks.append(region_heading(escape(region)))
             lines.append(f"\n{region}")
             for source in (s for s in SOURCES if s["region"] == region):
                 name = source["name"]
@@ -262,11 +292,14 @@ def build(output, base, edition):
                     lines.append(f'{name} ({lead["method"]})\n{lead["title"]}\n{lead["description"]}\n{lead["url"]}')
                 else:
                     message = f"{name} — leading story could not be retrieved."
-                    blocks.append(f"<p>{escape(message)}</p>")
+                    blocks.append(f'<p class="region-unavailable">{escape(message)}</p>')
                     lines.append(message)
+            blocks.append("</section>")
         write(archive / f"{TODAY}.txt", "\n\n".join(lines) + "\n")
         write(edition_file, page(f"Press review · {TODAY}", "".join(blocks), "../"))
     editions = sorted(archive.glob("????-??-??.html"), reverse=True)
+    for saved in editions:
+        update_archived_layout(saved)
     links = "".join(f'<li><a href="{f.name}">{f.stem}</a></li>' for f in editions)
     write(archive / "index.html", page("Daily press review", f"<ul>{links}</ul>" if links else "<p>The first edition is pending.</p>", "../"))
     daily = [{"title": f"Regional press review · {f.stem}", "url": f"{base}archive/{f.name}",
