@@ -1,0 +1,80 @@
+name: Update Regional News Monitor
+on:
+  workflow_dispatch:
+    inputs:
+      edition:
+        description: Generate today's edition without sending email
+        type: boolean
+        default: true
+  schedule:
+    - cron: '11,41 * * * *'
+    - cron: '0 7 * * *'
+      timezone: Europe/Nicosia
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: regional-news-monitor
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: regional-news-monitor/requirements.txt
+      - name: Restore the previous collection and archive
+        run: |
+          git fetch origin '+refs/heads/*:refs/remotes/origin/*'
+          if git show-ref --verify --quiet refs/remotes/origin/monitor-state; then
+            git worktree add --detach public origin/monitor-state
+          else
+            git worktree add --detach public HEAD
+            git -C public switch --orphan monitor-state
+          fi
+      - uses: actions/cache@v4
+        with:
+          path: ~/.local/share/argos-translate/packages
+          key: argos-fr-en-v1
+      - name: Install homepage parser
+        run: python -m pip install beautifulsoup4==4.14.3
+      - name: Set up French translation
+        continue-on-error: true
+        run: |
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu 'torch==2.8.0'
+          python -m pip install -r regional-news-monitor/requirements.txt
+          python regional-news-monitor/install_translation.py
+      - name: Build dashboard, feeds and archive
+        env:
+          EDITION: ${{ github.event.schedule == '0 7 * * *' || inputs.edition == true }}
+        run: |
+          args=()
+          if [[ "$EDITION" == true ]]; then args+=(--edition); fi
+          python regional-news-monitor/monitor.py --base https://alexkolm1.github.io/regional-news-monitor/ "${args[@]}"
+      - name: Save publication state
+        run: |
+          git -C public config user.name 'github-actions[bot]'
+          git -C public config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C public add -A
+          if ! git -C public diff --cached --quiet; then
+            git -C public commit -m 'Update newsroom feeds and archive'
+            git -C public push origin HEAD:refs/heads/monitor-state
+          fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
