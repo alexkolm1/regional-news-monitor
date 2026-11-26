@@ -1,0 +1,129 @@
+[
+  {
+    "name": "Asharq Al-Awsat",
+    "home": "https://english.aawsat.com/",
+    "candidate": "https://english.aawsat.com/feed",
+    "region": "Pan-Arab and Gulf",
+    "language": "en"
+  },
+  {
+    "name": "Arab News",
+    "home": "https://www.arabnews.com/",
+    "candidate": "https://www.arabnews.com/rss.xml",
+    "region": "Pan-Arab and Gulf",
+    "language": "en"
+  },
+  {
+    "name": "Middle East Eye",
+    "home": "https://www.middleeasteye.net/",
+    "candidate": "https://www.middleeasteye.net/rss",
+    "region": "Pan-Arab and Gulf",
+    "language": "en"
+  },
+  {
+    "name": "The National",
+    "home": "https://www.thenationalnews.com/",
+    "candidate": "https://www.thenationalnews.com/arc/outboundfeeds/rss-latest/?outputType=xml&_website=the-national",
+    "region": "Pan-Arab and Gulf",
+    "language": "en"
+  },
+  {
+    "name": "Gulf News",
+    "home": "https://gulfnews.com/",
+    "candidate": "https://gulfnews.com/stories.rss",
+    "region": "Pan-Arab and Gulf",
+    "language": "en"
+  },
+  {
+    "name": "Haaretz",
+    "home": "https://www.haaretz.com/",
+    "candidate": "https://www.haaretz.com/srv/all-headlines-rss",
+    "region": "Israel and Levant",
+    "language": "en"
+  },
+  {
+    "name": "The Times of Israel",
+    "home": "https://www.timesofisrael.com/",
+    "candidate": "https://www.timesofisrael.com/feed/",
+    "region": "Israel and Levant",
+    "language": "en"
+  },
+  {
+    "name": "L’Orient Today",
+    "home": "https://today.lorientlejour.com/",
+    "candidate": null,
+    "region": "Israel and Levant",
+    "language": "en"
+  },
+  {
+    "name": "Enab Baladi",
+    "home": "https://english.enabbaladi.net/",
+    "candidate": "https://english.enabbaladi.net/feed/",
+    "region": "Israel and Levant",
+    "language": "en"
+  },
+  {
+    "name": "The Jordan Times",
+    "home": "https://jordantimes.com/",
+    "candidate": null,
+    "region": "Israel and Levant",
+    "language": "en"
+  },
+  {
+    "name": "Ahram Online",
+    "home": "https://english.ahram.org.eg/",
+    "candidate": null,
+    "region": "North Africa",
+    "language": "en"
+  },
+  {
+    "name": "Libya Herald",
+    "home": "https://libyaherald.com/",
+    "candidate": null,
+    "region": "North Africa",
+    "language": "en"
+  },
+  {
+    "name": "Business News Tunisia",
+    "home": "https://www.businessnews.com.tn/",
+    "candidate": "https://businessnews.com.tn/feed/",
+    "region": "North Africa",
+    "language": "fr"
+  },
+  {
+    "name": "TSA Algérie",
+    "home": "https://www.tsa-algerie.com/",
+    "candidate": "https://www.tsa-algerie.com/feed/",
+    "region": "North Africa",
+    "language": "fr"
+  },
+  {
+    "name": "TASS",
+    "home": "https://tass.com/",
+    "candidate": "https://tass.com/rss/v2.xml",
+    "region": "Russia, Ukraine and Balkans",
+    "language": "en"
+  },
+  {
+    "name": "The Moscow Times",
+    "home": "https://www.themoscowtimes.com/",
+    "candidate": "https://www.themoscowtimes.com/rss/news",
+    "region": "Russia, Ukraine and Balkans",
+    "language": "en"
+  },
+  {
+    "name": "Balkan Insight",
+    "home": "https://balkaninsight.com/",
+    "candidate": "https://balkaninsight.com/feed/",
+    "region": "Russia, Ukraine and Balkans",
+    "language": "en"
+  },
+  {
+    "name": "Ukrainska Pravda",
+    "home": "https://www.pravda.com.ua/eng/",
+    "candidate": "https://www.pravda.com.ua/eng/rss/view_news/",
+    "region": "Russia, Ukraine and Balkans",
+    "language": "en",
+    "top": "https://www.pravda.com.ua/eng/rss/view_mainnews/"
+  }
+]
