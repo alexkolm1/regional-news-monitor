@@ -181,7 +181,7 @@ def page(title, content, prefix=""):
 <title>{escape(title)} | Regional News Monitor</title>
 <link rel="alternate" type="application/rss+xml" title="Latest news" href="{prefix}feed.xml">
 <link rel="alternate" type="application/rss+xml" title="Daily review" href="{prefix}daily.xml">
-<link rel="stylesheet" href="{prefix}style.css">
+<link rel="stylesheet" href="{prefix}style.css?v=regional-preview">
 <header><a class="masthead" href="{prefix}index.html">Regional News Monitor</a>
 <nav aria-label="Main"><a href="{prefix}index.html">Latest news</a>
 <a href="{prefix}archive/">Press review</a><a href="{prefix}sources/">Sources</a>
@@ -239,7 +239,7 @@ def build(output, base, edition):
     filters = f"""<p class="meta">Last successful collection <time>{stamp}</time></p>
 <div class="filters"><label>Region <select id="region"><option value="">All regions</option>{options(s["region"] for s in SOURCES)}</select></label>
 <label>Publication <select id="source"><option value="">All publications</option>{options(s["name"] for s in SOURCES)}</select></label></div>
-<p id="empty" hidden>No articles match these filters.</p><script defer src="filters.js"></script>"""
+<p id="empty" hidden>No articles match these filters.</p><script defer src="filters.js?v=regional-preview"></script>"""
     write(output / "index.html", page("Latest news", filters + "".join(map(card, latest))))
     source_html = "".join(f'<li><a href="{escape(s["home"])}">{escape(s["name"])}</a> · {escape(s["region"])} · '
                           f'{escape(status[s["name"]])}</li>' for s in SOURCES)
