@@ -1,16 +1,93 @@
-:root{color-scheme:light;background:#f8f6f1;color:#22201d;font:16px/1.55 Georgia,serif}
-body{max-width:72rem;margin:auto;padding:1.5rem clamp(1rem,4vw,3rem)}
-header{border-block:3px double #252320;padding:.5rem 0 1rem}
-nav,.filters{display:flex;flex-wrap:wrap;gap:.5rem 1.25rem}
-nav,.filters,.meta{font-family:system-ui,sans-serif;font-size:.88rem}
-.masthead{font-size:clamp(2rem,6vw,3.7rem);font-weight:bold;line-height:1.2;text-decoration:none}
-a{color:inherit;text-underline-offset:.18em}
-a:hover{color:#8a261c}
-main{max-width:54rem}
-h1{font-size:2rem}
-h2{font-size:1.35rem;line-height:1.3;margin:.25rem 0}
-article{border-bottom:1px solid #cfc8bd;padding:1rem 0}
-article p{margin:.3rem 0}
-.meta{color:#62594d}
-select{padding:.35rem;font:inherit;max-width:15rem}
-li{margin:.35rem 0}
+:root {
+  color-scheme: light;
+  --paper: #f5f5ef;
+  --surface: #fff;
+  --ink: #172823;
+  --muted: #4e625b;
+  --line: #d9e2db;
+  --accent: #205547;
+  --soft: #e8f0eb;
+  background: var(--paper);
+  color: var(--ink);
+  font: 16px/1.5 system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { max-width: 78rem; margin: auto; padding: clamp(.75rem, 3vw, 2rem); }
+a { color: inherit; text-underline-offset: .18em; }
+a:hover { color: var(--accent); }
+:focus-visible { outline: 3px solid #936121; outline-offset: 4px; }
+header {
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  border-radius: .7rem;
+  background: #142f28;
+  color: #fff;
+}
+.masthead {
+  display: inline-block;
+  font: 700 clamp(1.9rem, 5vw, 3.5rem)/1.12 Georgia, serif;
+  text-decoration: none;
+}
+header a:hover { color: #d2eee1; }
+nav { display: flex; flex-wrap: wrap; gap: .35rem 1.2rem; margin-top: 1.1rem; }
+nav a { color: #e3eee8; font-size: .9rem; padding: .25rem 0; }
+main { max-width: 64rem; margin: 2rem auto; }
+h1, h2, h3 { font-family: Georgia, serif; line-height: 1.2; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 .5rem; }
+h2 { font-size: 1.4rem; margin: .4rem 0; }
+.meta { color: var(--muted); font-size: .86rem; margin: .25rem 0; }
+.region-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: 1.25rem 0 .85rem;
+}
+.region-controls button, select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid #a9bcb0;
+  border-radius: .4rem;
+  min-height: 2.65rem;
+  padding: .45rem .75rem;
+}
+.region-controls button { cursor: pointer; font-size: .9rem; font-weight: 600; }
+.region-controls button:hover { background: var(--soft); }
+.region-controls button[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: white; }
+.filters label { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-size: .9rem; font-weight: 600; }
+select { max-width: 100%; }
+.result-count { color: var(--muted); font-size: .9rem; margin: .8rem 0 1rem; }
+.region-section {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: .6rem;
+  margin: 0 0 1.35rem;
+  overflow: clip;
+}
+.region-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .3rem 1rem;
+  padding: .85rem clamp(.85rem, 3vw, 1.45rem);
+  background: var(--soft);
+  border-bottom: 1px solid var(--line);
+}
+.region-heading h2 { margin: 0; font-size: clamp(1.2rem, 3vw, 1.55rem); }
+.region-count { color: var(--muted); font-size: .84rem; }
+article { border-bottom: 1px solid var(--line); padding: .9rem 0; }
+.region-section article { padding: .95rem clamp(.85rem, 3vw, 1.45rem); }
+.region-section article:last-child { border-bottom: 0; }
+article h3 { font-size: clamp(1.15rem, 2.7vw, 1.35rem); margin: .25rem 0; }
+article h2 a, article h3 a { text-decoration: none; }
+article h2 a:hover, article h3 a:hover, article h2 a:focus-visible, article h3 a:focus-visible { text-decoration: underline; }
+article p { margin: .3rem 0 0; overflow-wrap: anywhere; }
+article p:empty { display: none; }
+li { margin: .4rem 0; }
+@media (max-width: 35rem) {
+  main { margin-top: 1.45rem; }
+  nav { gap: .15rem .85rem; }
+  .region-controls { gap: .35rem; }
+  .region-controls button { padding-inline: .55rem; }
+}
