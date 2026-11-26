@@ -97,3 +97,5 @@ li { margin: .4rem 0; }
 .region-section:nth-of-type(3) { --region-accent: #916123; --region-bg: #f8efde; }
 .region-section:nth-of-type(4) { --region-accent: #76547e; --region-bg: #f1eaf4; }
 .region-heading { background: var(--region-bg); }
+.region-section > p { margin: 0; padding: .85rem clamp(.85rem, 3vw, 1.45rem); border-bottom: 1px solid var(--line); color: var(--muted); }
+.region-section > p:last-child { border-bottom: 0; }
