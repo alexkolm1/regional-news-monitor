@@ -72,8 +72,9 @@ function filterArticles() {
   for (const [name, group] of regions) {
     let count = 0;
     const regionMatches = !region.value || region.value === name;
+    const limit = region.value ? Infinity : 10;
     for (const article of group.articles) {
-      const show = regionMatches && (!source.value || article.dataset.source === source.value);
+      const show = count < limit && regionMatches && (!source.value || article.dataset.source === source.value);
       article.hidden = !show;
       if (show) count += 1;
     }
@@ -81,7 +82,7 @@ function filterArticles() {
     group.count.textContent = articleCount(count);
     total += count;
   }
-  result.textContent = articleCount(total);
+  result.textContent = region.value ? articleCount(total) : articleCount(total) + ' · Up to 10 newest per region';
   empty.hidden = total > 0;
 }
 
