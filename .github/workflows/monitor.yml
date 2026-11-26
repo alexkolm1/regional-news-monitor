@@ -6,6 +6,10 @@ on:
         description: Generate today's edition without sending email
         type: boolean
         default: true
+      email_test:
+        description: Send a test edition to the sender mailbox only
+        type: boolean
+        default: false
   schedule:
     - cron: '11,41 * * * *'
     - cron: '0 7 * * *'
@@ -51,7 +55,7 @@ jobs:
           python regional-news-monitor/install_translation.py
       - name: Build dashboard, feeds and archive
         env:
-          EDITION: ${{ github.event.schedule == '0 7 * * *' || inputs.edition == true }}
+          EDITION: ${{ github.event.schedule == '0 7 * * *' || inputs.edition == true || inputs.email_test == true }}
         run: |
           args=()
           if [[ "$EDITION" == true ]]; then args+=(--edition); fi
@@ -78,3 +82,56 @@ jobs:
     steps:
       - uses: actions/deploy-pages@v4
         id: deployment
+  email:
+    name: Deliver daily press review
+    needs: deploy
+    if: github.event.schedule == '0 7 * * *' || inputs.email_test == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
+        with:
+          ref: monitor-state
+          path: public
+      - name: Send with newsroom SMTP credentials
+        env:
+          TEST_ONLY: ${{ inputs.email_test == true }}
+          NEWS_SMTP_USER: ${{ secrets.NEWS_SMTP_USER }}
+          NEWS_SMTP_PASSWORD: ${{ secrets.NEWS_SMTP_PASSWORD }}
+          NEWS_RECIPIENTS: ${{ secrets.NEWS_RECIPIENTS }}
+          NEWS_SMTP_HOST: ${{ vars.NEWS_SMTP_HOST }}
+          NEWS_SMTP_PORT: ${{ vars.NEWS_SMTP_PORT }}
+        run: |
+          if [[ "$TEST_ONLY" == true ]]; then
+            export NEWS_RECIPIENTS="$NEWS_SMTP_USER"
+          fi
+          if [[ -z "$NEWS_SMTP_USER" || -z "$NEWS_SMTP_PASSWORD" || -z "$NEWS_RECIPIENTS" ]]; then
+            echo 'Email credentials or recipients have not been configured.'
+            if [[ "$TEST_ONLY" == true ]]; then exit 1; fi
+            exit 0
+          fi
+          today=$(TZ=Europe/Nicosia date +%F)
+          if [[ ! -s "public/archive/$today.txt" || ! -s "public/archive/$today.html" ]]; then
+            echo 'The published edition for today is missing.'
+            exit 1
+          fi
+          if [[ "$TEST_ONLY" != true ]]; then
+            marker=".email-attempts/$today"
+            if [[ -e "public/$marker" ]]; then
+              echo 'Delivery already attempted for this edition.'
+              exit 0
+            fi
+            mkdir -p public/.email-attempts
+            touch "public/$marker"
+            git -C public add "$marker"
+            git -C public -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Record daily email delivery attempt'
+            git -C public push origin HEAD:refs/heads/monitor-state
+          fi
+          if ! python3 regional-news-monitor/send_edition.py >/dev/null 2>&1; then
+            echo 'Email delivery failed. Check SMTP settings and confirm delivery before retrying.'
+            exit 1
+          fi
+          echo 'SMTP accepted the edition.'
