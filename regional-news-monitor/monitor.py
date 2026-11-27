@@ -184,12 +184,43 @@ def page(title, content, prefix=""):
 <title>{escape(title)} | Regional News Monitor</title>
 <link rel="alternate" type="application/rss+xml" title="Latest news" href="{prefix}feed.xml">
 <link rel="alternate" type="application/rss+xml" title="Daily review" href="{prefix}daily.xml">
-<link rel="stylesheet" href="{prefix}style.css?v=cyprus-review">
+<link rel="stylesheet" href="{prefix}style.css?v=cyprus-picks">
 <header><a class="masthead" href="{prefix}index.html">Regional News Monitor</a>
 <nav aria-label="Main"><a href="{prefix}index.html">Latest news</a>
-<a href="{prefix}archive/">Press review</a><a href="{prefix}sources/">Sources</a>
+<a href="{prefix}cyprus/">Cyprus picks</a><a href="{prefix}archive/">Press review</a><a href="{prefix}sources/">Sources</a>
 <a href="{prefix}feed.xml">News RSS</a><a href="{prefix}daily.xml">Daily RSS</a></nav></header>
 <main><h1>{escape(title)}</h1>{content}</main></html>"""
+
+
+CYPRUS_MENTION = re.compile(r"\b(?:Cyprus|Cypriots?|Nicosia|Limassol|Larnaca|Paphos|Famagusta|Akrotiri|Dhekelia)\b", re.I)
+EASTERN_MED = re.compile(r"\b(?:east(?:ern)? mediterranean|eastmed|levantine basin)\b", re.I)
+CYPRUS_TOPICS = (
+    (re.compile(r"\b(?:gas|energy|electricity|interconnector|pipeline|offshore drilling)\b", re.I), "Eastern Mediterranean energy"),
+    (re.compile(r"\b(?:shipping|maritime|ports?|sea lanes?)\b", re.I), "Eastern Mediterranean shipping"),
+    (re.compile(r"\b(?:evacuat\w*|migration|refugees?|rescue|aid corridor)\b", re.I), "Eastern Mediterranean humanitarian affairs"),
+    (re.compile(r"\b(?:security|naval|military exercise|territorial waters|diplomacy)\b", re.I), "Eastern Mediterranean security and diplomacy"),
+)
+
+
+def cyprus_picks(articles):
+    cutoff = NOW - timedelta(days=3)
+    matches = []
+    for row in articles:
+        if datetime.fromisoformat(row["date"]) < cutoff:
+            continue
+        title = row["title"]
+        description = row["description"]
+        text = f"{title} {description}"
+        if CYPRUS_MENTION.search(title):
+            matches.append((3, row, "Cyprus connection in headline"))
+        elif CYPRUS_MENTION.search(description):
+            matches.append((2, row, "Cyprus connection in description"))
+        elif EASTERN_MED.search(text):
+            topic = next((label for pattern, label in CYPRUS_TOPICS if pattern.search(text)), None)
+            if topic:
+                matches.append((1, row, topic))
+    matches.sort(key=lambda match: (match[0], datetime.fromisoformat(match[1]["date"])), reverse=True)
+    return [dict(row, method=reason) for _, row, reason in matches[:10]]
 
 
 def cyprus_time(value):
@@ -203,7 +234,7 @@ def region_heading(label):
 
 def update_archived_layout(path):
     original = path.read_text(encoding="utf-8")
-    updated = original.replace('style.css?v=regional-preview', 'style.css?v=cyprus-review')
+    updated = original.replace('style.css?v=regional-preview', 'style.css?v=cyprus-picks')
     if 'class="region-section"' not in updated:
         for index, region in enumerate(dict.fromkeys(source["region"] for source in SOURCES)):
             label = escape(region)
@@ -272,8 +303,12 @@ def build(output, base, edition):
     filters = f"""<p class="meta">Last successful collection <time>{stamp}</time></p>
 <div class="filters"><label>Region <select id="region"><option value="">All regions</option>{options(s["region"] for s in SOURCES)}</select></label>
 <label>Publication <select id="source"><option value="">All publications</option>{options(s["name"] for s in SOURCES)}</select></label></div>
-<p id="empty" hidden>No articles match these filters.</p><script defer src="filters.js?v=regional-preview"></script>"""
+<p id="empty" hidden>No articles match these filters.</p><script defer src="filters.js?v=regional-grid"></script>"""
     write(output / "index.html", page("Latest news", filters + "".join(map(card, latest))))
+    picks = cyprus_picks(latest)
+    picks_intro = '<p class="meta">Recent headlines selected for their connection to Cyprus and the Eastern Mediterranean.</p>'
+    picks_body = "".join(map(card, picks)) if picks else '<p>No matching headlines from the past three days.</p>'
+    write(output / "cyprus/index.html", page("Cyprus picks", picks_intro + picks_body, "../"))
     source_html = "".join(f'<li><a href="{escape(s["home"])}">{escape(s["name"])}</a> · {escape(s["region"])} · '
                           f'{escape(status[s["name"]])}</li>' for s in SOURCES)
     write(output / "sources/index.html", page("Monitored publications", f"<ul>{source_html}</ul>", "../"))
