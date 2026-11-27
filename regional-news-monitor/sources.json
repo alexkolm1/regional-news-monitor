@@ -79,7 +79,7 @@
   {
     "name": "Libya Herald",
     "home": "https://libyaherald.com/",
-    "candidate": null,
+    "candidate": "https://libyaherald.com/rss.xml",
     "region": "North Africa",
     "language": "en"
   },
