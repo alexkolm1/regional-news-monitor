@@ -3,7 +3,7 @@ const source = document.querySelector('#source');
 const empty = document.querySelector('#empty');
 const articles = [...document.querySelectorAll('article[data-region]')];
 
-const preferredOrder = ['Pan-Arab and Gulf', 'Israel and Levant', 'North Africa', 'Russia, Ukraine and Balkans'];
+const preferredOrder = ['Pan-Arab and Gulf', 'Russia, Ukraine and Balkans', 'North Africa', 'Israel and Levant'];
 const regionNames = new Set([...region.options].map(option => option.value).filter(Boolean));
 const names = [...preferredOrder.filter(name => regionNames.delete(name)), ...regionNames];
 const filters = region.closest('.filters');
@@ -19,10 +19,15 @@ result.className = 'result-count';
 result.setAttribute('role', 'status');
 filters.after(result);
 
+const grid = document.createElement('div');
+grid.className = 'regional-grid';
+empty.before(grid);
+
 const regions = new Map();
 for (const name of names) {
   const section = document.createElement('section');
   section.className = 'region-section';
+  section.dataset.region = name;
   const header = document.createElement('div');
   header.className = 'region-heading';
   const heading = document.createElement('h2');
@@ -31,7 +36,7 @@ for (const name of names) {
   count.className = 'region-count';
   header.append(heading, count);
   section.append(header);
-  empty.before(section);
+  grid.append(section);
   regions.set(name, { section, count, articles: [] });
 }
 
@@ -65,6 +70,7 @@ function articleCount(count) {
 }
 
 function filterArticles() {
+  grid.classList.toggle('regional-grid-overview', !region.value);
   for (const [name, button] of buttons) {
     button.setAttribute('aria-pressed', String(name === region.value));
   }

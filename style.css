@@ -99,3 +99,14 @@ li { margin: .4rem 0; }
 .region-heading { background: var(--region-bg); }
 .region-section > p { margin: 0; padding: .85rem clamp(.85rem, 3vw, 1.45rem); border-bottom: 1px solid var(--line); color: var(--muted); }
 .region-section > p:last-child { border-bottom: 0; }
+.regional-grid .region-section[data-region='Israel and Levant'] { --region-accent: #45678b; --region-bg: #eaf0f8; }
+.regional-grid .region-section[data-region='Russia, Ukraine and Balkans'] { --region-accent: #76547e; --region-bg: #f1eaf4; }
+@media (min-width: 48rem) {
+  .regional-grid-overview {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 1.25rem;
+  }
+  .regional-grid-overview .region-section { margin-bottom: 0; }
+}
