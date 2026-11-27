@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 import re
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from xml.etree import ElementTree as ET
 from zoneinfo import ZoneInfo
@@ -103,6 +104,8 @@ def collect(source):
     try:
         items = read_feed(source["candidate"])
         return items, "Available" if items else "No eligible articles returned"
+    except HTTPError as error:
+        return [], f"Collection failed (HTTP {error.code})"
     except (OSError, ET.ParseError, ValueError) as error:
         return [], f"Collection failed ({type(error).__name__})"
 
